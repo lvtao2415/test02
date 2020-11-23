@@ -38,7 +38,7 @@ pipeline {
                     def dayOfYear = new java.text.SimpleDateFormat("D").format(new Date()).toInteger()
                     def versionWeekOfYear = new java.text.SimpleDateFormat("w").format(new Date()).toInteger()
                     echo "${versionYear}-${dayOfYear}-${versionWeekOfYear}"
-                    echo "New version computed: ${versionNew}, set in enviroment env.VERSION_NEW: ${env.VERSION_NEW}"
+                    echo "New version computed: ${versionYear}"
                 }
                 
             }
