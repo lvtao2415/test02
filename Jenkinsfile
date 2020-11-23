@@ -38,9 +38,18 @@ pipeline {
                     def dayOfYear = new java.text.SimpleDateFormat("D").format(new Date()).toInteger()
                     def versionWeekOfYear = new java.text.SimpleDateFormat("w").format(new Date()).toInteger()
                     echo "${versionYear}-${dayOfYear}-${versionWeekOfYear}"
-                    echo "New version computed: ${versionYear}"
+                    env.VERSION_NEW = "${versionYear}.${dayOfYear}.${versionWeekOfYear}.${currentBuild.number}"
+                    echo "set in enviroment env.VERSION_NEW: ${env.VERSION_NEW}"
                 }
-                
+                script {
+                    for (build in msBuildList) {
+                        bat """
+                        cd ${build.workDir}
+                        set MSBUILDDEBUGPATH="./buildlogs/"
+                        dotnet msbuild /m /verbosity:normal /t:Restore /t:Rebuild /p:Configuration=Release /p:DefineConstants=\"KONGREGISTER\" /p:PublishDir=./bin/PublishTemp/ ${build.file}
+                        """  
+                    }
+                }
             }
         }   
 
