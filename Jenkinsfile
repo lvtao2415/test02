@@ -51,6 +51,39 @@ pipeline {
                 }
             }
         }   
+        stage('UnitTest'){
+            when {
+                equals expected: 'SUCCESS', actual: currentBuild.currentResult
+            }
+            steps {
+                fileOperations([
+                    fileDeleteOperation(includes: "**/unittest-result*", excludes: "")
+                ])
+
+                script {
+                    bat """
+                    cd ${msBuildSolutionFileDir}
+                    dotnet test --no-build ${msBuildSolutionFile} /m /p:Configuration=Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Include=\\\"${unitTestCoverIncludeFilter}\\\" /p:Exclude=\\\"${unitTestCoverExcludeFilter}\\\" --logger \"trx;LogFileName=unittest-result.trx\" || exit 0 
+                    """
+                }
+                echo "Publish unit test report"
+                script {
+                    echo "Publish nunit report"
+                    xunit (
+                        thresholds: [ failed(failureThreshold: '0') ],
+                        tools:[ MSTest(pattern:"**/unittest-result*.trx", skipNoTestFiles:true, failIfNotNew:false, deleteOutputFiles:false, stopProcessingIfError:false) ]
+                    )
+                }           
+                script {
+                    echo "Publish nunit coverage report(cobertura)"
+                    cobertura coberturaReportFile:"**/coverage.cobertura.xml"
+                }
+            }
+        }
+
+
+
+
 
 
 
