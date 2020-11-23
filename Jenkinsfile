@@ -1,12 +1,12 @@
-def msBuildSolutionFileDir = "mytest02"
+def msBuildSolutionFileDir = "APIProject"
 def msBuildSolutionFile = "test02.sln"
 def msBuildList = [
     [
-        workDir: 'mytest02',
+        workDir: 'APIProject',
         file: 'test02.sln'
     ],
     [
-        workDir: 'mytest02/testDto',
+        workDir: 'APIProject/testDto',
         file: 'testDto.csproj'
     ]
 ]
@@ -37,7 +37,6 @@ pipeline {
                     def versionYear = new java.text.SimpleDateFormat("yy").format(new Date()).toInteger()
                     def dayOfYear = new java.text.SimpleDateFormat("D").format(new Date()).toInteger()
                     def versionWeekOfYear = new java.text.SimpleDateFormat("w").format(new Date()).toInteger()
-                    echo "${versionYear}-${dayOfYear}-${versionWeekOfYear}"
                     env.VERSION_NEW = "${versionYear}.${dayOfYear}.${versionWeekOfYear}.${currentBuild.number}"
                     echo "set in enviroment env.VERSION_NEW: ${env.VERSION_NEW}"
                 }
