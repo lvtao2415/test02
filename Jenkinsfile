@@ -117,6 +117,11 @@ pipeline {
                                 fileOperations([
                                     folderDeleteOperation(folderPath: "./${proj[0]}/bin/nupkg")
                                 ])
+                                def recipients = msg.getRecipients(javax.mail.Message.RecipientType.TO)
+                                def domainFilter = {addr -> addr.toString().endsWith('@best-inc.com')}
+                                echo "${recipients}"
+                                echo "${domainFilter}"
+                                echo "${WORKSPACE}"
                                 echo "${getWindowsStylePath("${proj[0]}/bin/nupkg/*.nupkg")}"
                                 bat "\"${WORKSPACE}\\tools\\octo.exe\" pack --id=${proj[3]} --format=NuPkg --version=${env.VERSION_NEW} --outFolder=\"${proj[0]}/bin/nupkg\" --basePath=\"${proj[0]}/bin/Publish\" --author=\"${BUILD_TAG}\" --description=\"BuildNumber: ${BUILD_NUMBER}  GitBranch: ${GIT_BRANCH}  GitCommit: ${GIT_COMMIT}\""
                             }
@@ -127,7 +132,9 @@ pipeline {
         }
 
 
-
-
     }
+    
+
+
+
 }
