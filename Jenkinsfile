@@ -63,7 +63,7 @@ pipeline {
                 script {
                     bat """
                     cd ${msBuildSolutionFileDir}
-                    dotnet test --no-build ${msBuildSolutionFile} /m /p:Configuration=Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Include=\\\"${unitTestCoverIncludeFilter}\\\" /p:Exclude=\\\"${unitTestCoverExcludeFilter}\\\" --logger \"trx;LogFileName=unittest-result.trx\" || exit 0 
+                    dotnet test --no-build ${msBuildSolutionFile} /m /p:Configuration=Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura --logger \"trx;LogFileName=unittest-result.trx\" || exit 0 
                     """
                 }
                 echo "Publish unit test report"
