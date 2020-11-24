@@ -12,7 +12,7 @@ def msBuildList = [
 ]
 def publishProjectList =    [
         [ 'APIProject/test02', true, ['TestProject'], "Test.API"],
-        [ 'APIProject/testDto', true, ['TestProject'],"Test.Dto"],
+        [ 'APIProject/testDto', true, ['TestProject'], "Test.Dto"]
 ]
 
 pipeline {
