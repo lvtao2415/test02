@@ -11,8 +11,8 @@ def msBuildList = [
     ]
 ]
 def publishProjectList =    [
-        [ 'APIProject/test02', ['TestProject'], [], "Test.API"],
-        [ 'APIProject/testDto', ['TestProject'], [], "Test.Dto"],
+        [ 'APIProject/test02', true, ['TestProject'], "Test.API"],
+        [ 'APIProject/testDto', true, ['TestProject'],"Test.Dto"],
 ]
 
 pipeline {
@@ -101,7 +101,28 @@ pipeline {
                 }
             }
         }
-
+        stage('Pacakge') {
+            when {
+                equals expected: 'SUCCESS', actual: currentBuild.currentResult
+            }
+            parallel {
+                stage('Nuget') {
+                    steps {
+                        script{
+                            for (proj in publishProjectList) {
+                                // check is need buikd nuget pacakge
+                                if(proj[1] != 'true') {
+                                    continue
+                                }
+                                fileOperations([
+                                    folderDeleteOperation(folderPath: "./${proj[0]}/bin/nupkg")
+                                ])
+                                echo "${getWindowsStylePath("${proj[0]}/bin/nupkg/*.nupkg")}"
+                                bat "\"${WORKSPACE}\\tools\\octo.exe\" pack --id=${proj[3]} --format=NuPkg --version=${env.VERSION_NEW} --outFolder=\"${proj[0]}/bin/nupkg\" --basePath=\"${proj[0]}/bin/Publish\" --author=\"${BUILD_TAG}\" --description=\"BuildNumber: ${BUILD_NUMBER}  GitBranch: ${GIT_BRANCH}  GitCommit: ${GIT_COMMIT}\""
+                            }
+                        }
+                    }
+                }
 
 
 
