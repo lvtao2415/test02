@@ -122,7 +122,6 @@ pipeline {
                                     folderDeleteOperation(folderPath: "./${proj[0]}/bin/nupkg")
                                 ])
                                 echo "Will show ${params.MailForm}"
-                                echo "Will show ${params.MailForm.tokenize('@')[1]}"
                                 
                                 echo "${WORKSPACE}"
                                 bat "\"${WORKSPACE}\\tools\\octo.exe\" pack --id=${proj[3]} --format=NuPkg --version=${env.VERSION_NEW} --outFolder=\"${proj[0]}/bin/nupkg\" --basePath=\"${proj[0]}/bin/Publish\" --author=\"${BUILD_TAG}\" --description=\"BuildNumber: ${BUILD_NUMBER}  GitBranch: ${GIT_BRANCH}  GitCommit: ${GIT_COMMIT}\""
@@ -136,35 +135,8 @@ pipeline {
 
     }
     post {
-        success {
-            script {
-                echo "currentResult: ${currentBuild.currentResult} result: ${currentBuild.result}"
-            }
-        }
         always {
-            script {
-                def buildResult = currentBuild.currentResult
-                def prevBuild = currentBuild.previousBuild
-                def prevBuildResult = prevBuild == null ? 'N/A' : prevBuild.result
-                def subject = "${buildResult} : ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-                def body = """<p>EXECUTED: test <b>\'${env.JOB_NAME}: #${env.BUILD_NUMBER}\' ${buildResult}
-                                  </b></p><p>View console output at "<a href="${env.BUILD_URL}">
-                                  ${env.JOB_NAME}: #${env.BUILD_NUMBER}</a>"</p> """
-                def recipientProviders = [
-                    [$class: 'DevelopersRecipientProvider'],
-                    [$class: 'RequesterRecipientProvider'],
-                    [$class: 'CulpritsRecipientProvider']
-                ]
-                def prevBuildHasError = prevBuildResult.equals('FAILURE') || prevBuildResult.equals('UNSTABLE')
-                
-                def emailextOptions = [
-                    subject: subject,
-                    body: body,
-                    recipientProviders: recipientProviders
-                ]
-                emailextOptions.to = "${params.MailForm}"
-                emailext emailextOptions
-            }
+            emailext body: 'A Test EMail', recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: 'Test', to:'1390538018@qq.com'
         }
     }
 
