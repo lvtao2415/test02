@@ -10,6 +10,10 @@ def msBuildList = [
         file: 'testDto.csproj'
     ]
 ]
+def publishProjectList =    [
+        [ 'APIProject/test02', ['TestProject'], [], "Test.API"],
+        [ 'APIProject/testDto', ['TestProject'], [], "Test.Dto"],
+]
 
 pipeline {
     agent any
@@ -66,21 +70,37 @@ pipeline {
                     dotnet test --no-build ${msBuildSolutionFile} /m /p:Configuration=Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura --logger \"trx;LogFileName=unittest-result.trx\" || exit 0 
                     """
                 }
-                echo "Publish unit test report"
+            }
+        }
+        stage('Publish') {
+            when {
+                equals expected: 'SUCCESS', actual: currentBuild.currentResult
+            }
+            steps {
                 script {
-                    echo "Publish nunit report"
-                    xunit (
-                        thresholds: [ failed(failureThreshold: '0') ],
-                        tools:[ MSTest(pattern:"**/unittest-result*.trx", skipNoTestFiles:true, failIfNotNew:false, deleteOutputFiles:false, stopProcessingIfError:false) ]
-                    )
-                }           
-                script {
-                    echo "Publish nunit coverage report(cobertura)"
-                    cobertura coberturaReportFile:"**/coverage.cobertura.xml"
+                    // clean all previously publish folder
+                    for (proj in publishProjectList) {
+                        fileOperations([
+                            folderDeleteOperation(folderPath: "./${proj[0]}/bin/Publish")
+                        ])
+                    }
+                    // publish solution for use parallel build&publish
+                    for (build in msBuildList) {
+                        bat """
+                        cd ${build.workDir}
+                        dotnet publish --no-build /m /verbosity:minimal /p:Configuration=Release /p:DefineConstants=\"KONGREGISTER\" /p:PublishDir=bin/PublishTemp/ ${build.file} || exit 0
+                        """
+                    }
+                    // clean Development files, prepare release files
+                    for (proj in publishProjectList) {
+                        fileOperations([
+                            folderRenameOperation(source: "${proj[0]}/bin/PublishTemp" , destination: "${proj[0]}/bin/Publish"),
+                            // fileDeleteOperation(includes: "${proj[0]}/bin/Publish/appsettings.Development.json", excludes: "")
+                        ])
+                    }
                 }
             }
         }
-
 
 
 
