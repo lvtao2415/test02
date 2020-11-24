@@ -11,14 +11,18 @@ def msBuildList = [
     ]
 ]
 def publishProjectList =    [
-        [ 'APIProject/test02', true, ['TestProject'], "Test.API"],
-        [ 'APIProject/testDto', true, ['TestProject'], "Test.Dto"]
+        [ 'APIProject/test02', 'true', ['TestProject'], "Test.API"],
+        [ 'APIProject/testDto', 'true', ['TestProject'], "Test.Dto"]
 ]
 
 pipeline {
     agent any
     options {
         timeout(time: 60, unit: 'MINUTES')
+    }
+
+    parameters {
+        string(name: 'MailForm', defaultValue: '12@34', description: '')
     }
 
     stages {
@@ -117,6 +121,8 @@ pipeline {
                                 fileOperations([
                                     folderDeleteOperation(folderPath: "./${proj[0]}/bin/nupkg")
                                 ])
+                                echo "Will show ${params.MailForm}"
+                                echo "Will show ${params.MailForm.tokenize('@')[1]}"
                                 def recipients = msg.getRecipients(javax.mail.Message.RecipientType.TO)
                                 def domainFilter = {addr -> addr.toString().endsWith('@best-inc.com')}
                                 echo "${recipients}"
